@@ -1,0 +1,14 @@
+.env
+bin/
+*.exe
+*.test
+data/*
+!data/recordings/
+data/recordings/*
+!data/recordings/.gitkeep
+*.jsonl
+*.gz
+.state/
+.idea/
+.vscode/
+.DS_Store
