@@ -24,6 +24,7 @@ import (
 	"strconv"
 	"strings"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -403,7 +404,7 @@ func main() {
 		serveMetrics(*metrics)
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM) // SIGTERM: docker stop
 	defer stop()
 
 	go func() {

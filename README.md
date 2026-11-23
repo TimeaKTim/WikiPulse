@@ -65,6 +65,21 @@ The older 2-hour all-wiki recording (222,141 events, **not in git**, ask Timea) 
 go run ./cmd/replay -file data/recordings/stream.jsonl.gz -speed 0
 ```
 
+## Running the tools in Docker (no Go needed)
+
+The collector and replay are also Compose services, behind profiles so that `docker compose up -d` still starts only Kafka:
+
+```bash
+docker compose --profile live up -d                      # live collector (restarts on failure), metrics on :9101
+docker compose stop collector                            # stop it; it flushes the archive first
+docker compose run --rm --no-deps collector -since 7d    # backfill the last week (no Kafka needed)
+docker compose run --rm replay                           # replay the archive at 60x
+docker compose run --rm replay -speed 1 -from 24h        # any replay flags work
+docker compose build                                     # rebuild after code changes
+```
+
+Both use `./data` (archive) and `./.state` (resume point) from this folder, so `go run` and Docker work on the same files.
+
 ## How to connect to Kafka
 
 | From                        | Address           |

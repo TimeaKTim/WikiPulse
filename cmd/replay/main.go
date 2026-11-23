@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/signal"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/segmentio/kafka-go"
@@ -148,7 +149,7 @@ func main() {
 		}
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM) // SIGTERM: docker stop
 	defer stop()
 
 	w := &kafka.Writer{

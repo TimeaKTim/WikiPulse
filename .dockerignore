@@ -1,0 +1,6 @@
+.git
+.env
+.state
+data
+bin
+*.gz

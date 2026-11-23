@@ -43,5 +43,42 @@ services:
           --topic $${KAFKA_TOPIC_RAW} --partitions $${KAFKA_TOPIC_PARTITIONS} --replication-factor 1
         /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --list
 
+  # Live listener: docker compose --profile live up -d
+  # Backfill:      docker compose run --rm --no-deps collector -since 7d
+  collector:
+    build: .
+    image: wikipulse-tools
+    container_name: wp-collector
+    profiles: [live]
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    env_file: .env
+    environment:
+      KAFKA_BOOTSTRAP: kafka:9092
+    entrypoint: ["/collector"]
+    ports:
+      - "9101:9101" # Prometheus metrics
+    volumes:
+      - ./data:/app/data
+      - ./.state:/app/.state
+    restart: unless-stopped
+    stop_grace_period: 30s # time to flush the archive and Kafka
+
+  # Replay the archive: docker compose run --rm replay [-speed 60] [-from 7d] [-loop]
+  replay:
+    build: .
+    image: wikipulse-tools
+    container_name: wp-replay
+    profiles: [replay]
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    entrypoint: ["/replay", "-broker", "kafka:9092", "-topic", "${KAFKA_TOPIC_RAW:-wiki.recentchange}"]
+    command: ["-speed", "60"]
+    volumes:
+      - ./data:/app/data:ro
+    stop_grace_period: 30s
+
 volumes:
   kafka-data:
