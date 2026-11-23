@@ -11,4 +11,8 @@ data/recordings/*
 .state/
 .idea/
 .vscode/
-.DS_Store/producer
+.DS_Store
+
+/collector
+/replay
+/producer
